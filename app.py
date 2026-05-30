@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import requests
 from flask import Flask, request, jsonify, render_template
@@ -54,10 +55,9 @@ def get_lastfm_track(title, artist):
     raw_tags = track.get("toptags", {}).get("tag", [])
     tags = [t["name"] for t in raw_tags[:5] if t.get("name")]
 
-    # Wiki summary — strip HTML tags crudely
+    # Wiki summary — strip HTML tags
     wiki_summary = track.get("wiki", {}).get("summary", "")
     if wiki_summary:
-        import re
         wiki_summary = re.sub(r"<[^>]+>", "", wiki_summary).strip()
         wiki_summary = wiki_summary[:400]  # keep it concise for the prompt
 
@@ -87,7 +87,6 @@ def get_lastfm_track(title, artist):
 def search_tmdb_movie(movie_title):
     """Search TMDB for a movie title and return the best match's metadata."""
     # Strip the year from "Title (Year)" if Claude included it
-    import re
     clean_title = re.sub(r"\s*\(\d{4}\)\s*$", "", movie_title).strip()
 
     resp = requests.get(
@@ -268,4 +267,4 @@ def match():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port, debug=False)
